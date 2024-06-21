@@ -1,4 +1,3 @@
-/* styles.css */
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
@@ -24,7 +23,7 @@ body {
     background-color: #ccc;
     height: 100%;
 }
-.plot-container {
+.plot-and-result-container {
     flex-grow: 1;
     border: 1px solid #ccc;
     padding: 10px;
@@ -32,8 +31,6 @@ body {
     background-color: #f9f9f9;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
 }
 .control-panel {
     display: flex;
@@ -41,29 +38,13 @@ body {
     width: 100%;
     margin-bottom: 10px;
 }
-.button-container {
-    display: flex;
-    flex-direction: column;
-}
-#togglePreprocess,
-#processButton {
-    margin-bottom: 10px;
-    cursor: pointer;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-}
-#togglePreprocess.active {
-    background-color: #28a745;
-}
 .result-container {
     border: 1px solid #ccc;
     padding: 10px;
     border-radius: 5px;
     background-color: #f9f9f9;
-    max-height: 300px;
+    min-height: 100px; /* Set a minimum height */
+    max-height: 50%; /* Optionally set a maximum height */
     overflow-y: auto;
     flex-grow: 1;
 }
@@ -95,6 +76,6 @@ body {
     display: none;
 }
 #plot {
+    flex-grow: 1;
     width: 100%;
-    height: 100%;
 }

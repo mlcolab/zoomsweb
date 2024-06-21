@@ -14,18 +14,13 @@
             <div class="file-list" id="fileTree"></div>
         </div>
         <div class="resizer w-1 bg-gray-400 cursor-ew-resize"></div>
-        <div class="plot-container flex-grow border p-3 rounded bg-gray-100 flex flex-col justify-center items-center">
+        <div class="plot-and-result-container flex-grow border p-3 rounded bg-gray-100 flex flex-col">
             <div class="control-panel flex justify-between w-full mb-4">
-                <div class="button-container flex flex-col">
-                    <button id="togglePreprocess" class="mb-2 p-2 bg-blue-500 text-white rounded">Preprocess</button>
-                    <button id="processButton" class="p-2 bg-yellow-500 text-white rounded">Analyze</button>
-                </div>
-                <div class="result-container border p-2 rounded bg-white max-h-72 overflow-y-auto flex-grow" id="resultContainer">
+                <div class="result-container border p-2 rounded bg-white flex-grow overflow-y-auto" id="resultContainer">
                     <div id="resultList"></div>
                 </div>
             </div>
-            <pre id="fileContent" class="hidden p-2 border rounded bg-white"></pre>
-            <div id="plot" class="w-full h-full"></div>
+            <div id="plot" class="flex-grow w-full"></div>
         </div>
     </div>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>

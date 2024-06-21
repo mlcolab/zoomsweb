@@ -65,8 +65,9 @@ function renderFileTree(tree, path) {
                     const reader = new FileReader();
                     reader.onload = async (e) => {
                         lastCSVData = e.target.result;
-                        plotCSV(lastCSVData);
-                        await runModel(lastCSVData); // Automatically run the model after plotting
+                        plotRawCSV(lastCSVData);
+                        const preprocessedData = preprocessCSV(lastCSVData);
+                        await runModel(preprocessedData);
                     };
                     reader.readAsText(file);
                 } else {
@@ -125,14 +126,10 @@ function preprocess(intensities, masses, binResolution = 0.5) {
     return { normalizedMeans, binMidpoints };
 }
 
-function plotCSV(data) {
+function plotRawCSV(data) {
     const rows = data.split('\n').slice(1).map(row => row.split(',').map(Number));
-    let mass = rows.map(row => row[0]);
-    let intensity = rows.map(row => row[1]);
-
-    const result = preprocess(intensity, mass);
-    intensity = result.normalizedMeans;
-    mass = result.binMidpoints;
+    const mass = rows.map(row => row[0]);
+    const intensity = rows.map(row => row[1]);
 
     const trace = {
         x: mass,
@@ -142,12 +139,21 @@ function plotCSV(data) {
     };
 
     const layout = {
-        title: 'Mass vs Intensity',
+        title: 'Mass vs Intensity (Raw Data)',
         xaxis: { title: 'Mass' },
         yaxis: { title: 'Intensity' }
     };
 
     Plotly.newPlot('plot', [trace], layout);
+}
+
+function preprocessCSV(data) {
+    const rows = data.split('\n').slice(1).map(row => row.split(',').map(Number));
+    const mass = rows.map(row => row[0]);
+    const intensity = rows.map(row => row[1]);
+
+    const result = preprocess(intensity, mass);
+    return result.normalizedMeans;
 }
 
 async function runModel(data) {
@@ -168,6 +174,7 @@ function displayResults(results) {
         const item = document.createElement('div');
         item.textContent = `${result.name}: ${result.score.toFixed(4)}`;
         resultList.appendChild(item);
+        console.log(`${result.name}: ${result.peaks}`);
     });
 }
 

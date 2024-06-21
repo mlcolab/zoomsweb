@@ -1,3 +1,4 @@
+import numpy as np
 from flask import Flask, request, jsonify, send_from_directory
 import torch
 import torch.nn.functional as F
@@ -15,6 +16,10 @@ classNames = [
     'Elephantidae', 'Others', 'Rhinocerotidae', 'Rangifer tarandus', 'Hominins'
 ]
 
+peaks = {
+    name: np.loadtxt(f'reference_data/{name}.csv').tolist() for name in classNames
+}
+
 
 @app.route('/run_model', methods=['POST'])
 def run_model():
@@ -25,7 +30,12 @@ def run_model():
         probabilities = F.softmax(output, dim=1).numpy()[0]
 
     results = sorted(
-        [{'name': classNames[i], 'score': 100 * round(float(probabilities[i]), 3)} for i in range(len(classNames))],
+        [
+            {
+                'name': name,
+                'score': 100 * round(float(probabilities[i]), 3),
+                'peaks': peaks[name]
+            } for i, name in enumerate(classNames)],
         key=lambda x: x['score'], reverse=True
     )
     # only send results with score > 0.01
