@@ -1,5 +1,46 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
+
+
+class InferenceModel:
+    def __init__(self, model):
+        self.model = model
+        self.model.eval()
+
+        self.class_names = [
+            'Canidae', 'Cervidae', 'CervidaeGazellaSaiga', 'Ovis', 'Equidae',
+            'CrocutaPanthera', 'BisonYak', 'Capra', 'Ursidae', 'Vulpes vulpes',
+            'Elephantidae', 'Others', 'Rhinocerotidae', 'Rangifer tarandus', 'Hominins'
+        ]
+
+        self.ref_peaks = {
+            name: np.loadtxt(f'reference_data/{name}.csv').tolist() for name in self.class_names
+        }
+
+    def __call__(self, data):
+        tensor = torch.tensor(data, dtype=torch.float32).unsqueeze(0).unsqueeze(0)
+        with torch.no_grad():
+            output = self.model(tensor)
+            probabilities = F.softmax(output, dim=1).numpy()[0]
+
+        results = sorted(
+            [
+                {
+                    'name': name,
+                    'score': 100 * round(float(probabilities[i]), 3),
+                    'peaks': self.ref_peaks[name],
+                } for i, name in enumerate(self.class_names)],
+            key=lambda x: x['score'], reverse=True
+        )
+        # only send results with score > 0.01
+        results = [r for r in results if r['score'] >= 1.]
+
+        for i, result in enumerate(results):
+            result['id'] = i
+
+        return results
 
 
 class CNN1D(nn.Module):
@@ -30,5 +71,4 @@ class CNN1D(nn.Module):
 
 def load_model(name: str = 'model'):
     model = torch.load(f'models/{name}.pth', map_location='cpu')
-    model.eval()
-    return model
+    return InferenceModel(model)

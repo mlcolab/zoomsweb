@@ -1,7 +1,5 @@
 import numpy as np
 from flask import Flask, request, jsonify, send_from_directory
-import torch
-import torch.nn.functional as F
 
 from model import load_model, CNN1D
 
@@ -10,40 +8,11 @@ app = Flask(__name__, static_folder='static')
 # Load your model
 model = load_model()
 
-classNames = [
-    'Canidae', 'Cervidae', 'CervidaeGazellaSaiga', 'Ovis', 'Equidae',
-    'CrocutaPanthera', 'BisonYak', 'Capra', 'Ursidae', 'Vulpes vulpes',
-    'Elephantidae', 'Others', 'Rhinocerotidae', 'Rangifer tarandus', 'Hominins'
-]
-
-peaks = {
-    name: np.loadtxt(f'reference_data/{name}.csv').tolist() for name in classNames
-}
-
 
 @app.route('/run_model', methods=['POST'])
 def run_model():
     data = request.json['data']
-    tensor = torch.tensor(data, dtype=torch.float32).unsqueeze(0).unsqueeze(0)
-    with torch.no_grad():
-        output = model(tensor)
-        probabilities = F.softmax(output, dim=1).numpy()[0]
-
-    results = sorted(
-        [
-            {
-                'name': name,
-                'score': 100 * round(float(probabilities[i]), 3),
-                'peaks': peaks[name],
-            } for i, name in enumerate(classNames)],
-        key=lambda x: x['score'], reverse=True
-    )
-    # only send results with score > 0.01
-    results = [r for r in results if r['score'] >= 1.]
-    for i, result in enumerate(results):
-        result['id'] = i
-
-    print(results)
+    results = model(data)
     return jsonify(results)
 
 
