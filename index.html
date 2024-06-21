@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local File Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .file-viewer {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .file-list {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .folder, .file {
+            cursor: pointer;
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .folder:hover, .file:hover {
+            background-color: #e0e0e0;
+        }
+        .folder::before {
+            content: "📁 ";
+        }
+        .file::before {
+            content: "📄 ";
+        }
+        .folder-contents {
+            margin-left: 20px;
+            display: none;
+        }
+        #fileContent {
+            white-space: pre-wrap;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="file-viewer">
+        <input type="file" id="fileInput" webkitdirectory directory multiple>
+        <div class="file-list" id="fileTree"></div>
+        <pre id="fileContent"></pre>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileTree = document.getElementById('fileTree');
+        const fileContent = document.getElementById('fileContent');
+
+        fileInput.addEventListener('change', (event) => {
+            const files = Array.from(event.target.files);
+            const root = buildFileTree(files);
+            fileTree.innerHTML = '';
+            renderFileTree(root, fileTree);
+        });
+
+        function buildFileTree(files) {
+            const root = {};
+            files.forEach(file => {
+                const parts = file.webkitRelativePath.split('/');
+                let current = root;
+                parts.forEach((part, index) => {
+                    if (!current[part]) {
+                        current[part] = index === parts.length - 1 ? file : {};
+                    }
+                    current = current[part];
+                });
+            });
+            return root;
+        }
+
+        function renderFileTree(tree, container) {
+            Object.keys(tree).forEach(key => {
+                const item = document.createElement('div');
+                if (tree[key] instanceof File) {
+                    item.textContent = key;
+                    item.classList.add('file');
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            fileContent.textContent = e.target.result;
+                        };
+                        reader.readAsText(tree[key]);
+                    });
+                } else {
+                    item.textContent = key;
+                    item.classList.add('folder');
+                    const contents = document.createElement('div');
+                    contents.classList.add('folder-contents');
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        contents.style.display = contents.style.display === 'none' ? 'block' : 'none';
+                    });
+                    item.appendChild(contents);
+                    renderFileTree(tree[key], contents);
+                }
+                container.appendChild(item);
+            });
+        }
+    </script>
+</body>
+</html>
