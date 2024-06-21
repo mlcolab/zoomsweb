@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Local File Viewer</title>
+    <title>Local File Viewer and CSV Plotter</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -46,20 +46,27 @@
             margin-top: 20px;
             border-radius: 5px;
             background-color: #f9f9f9;
+            display: none;
+        }
+        #plot {
+            margin-top: 20px;
         }
     </style>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
     <div class="file-viewer">
         <input type="file" id="fileInput" webkitdirectory directory multiple>
         <div class="file-list" id="fileTree"></div>
         <pre id="fileContent"></pre>
+        <div id="plot"></div>
     </div>
 
     <script>
         const fileInput = document.getElementById('fileInput');
         const fileTree = document.getElementById('fileTree');
         const fileContent = document.getElementById('fileContent');
+        const plot = document.getElementById('plot');
 
         let currentPath = [];
         let fileSystem = {};
@@ -101,6 +108,8 @@
                 backItem.addEventListener('click', () => {
                     path.pop();
                     renderFileTree(tree, path);
+                    plot.innerHTML = '';  // Clear the plot
+                    fileContent.style.display = 'none';  // Hide the file content
                 });
                 fileTree.appendChild(backItem);
             }
@@ -111,11 +120,22 @@
                     item.textContent = key;
                     item.classList.add('file');
                     item.addEventListener('click', () => {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            fileContent.textContent = e.target.result;
-                        };
-                        reader.readAsText(currentFolder[key]);
+                        const file = currentFolder[key];
+                        if (file.name.endsWith('.csv')) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                plotCSV(e.target.result);
+                            };
+                            reader.readAsText(file);
+                        } else {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                fileContent.textContent = e.target.result;
+                                fileContent.style.display = 'block';
+                                plot.innerHTML = '';  // Clear the plot
+                            };
+                            reader.readAsText(file);
+                        }
                     });
                 } else {
                     item.textContent = key;
@@ -123,10 +143,33 @@
                     item.addEventListener('click', () => {
                         path.push(key);
                         renderFileTree(tree, path);
+                        plot.innerHTML = '';  // Clear the plot
+                        fileContent.style.display = 'none';  // Hide the file content
                     });
                 }
                 fileTree.appendChild(item);
             });
+        }
+
+        function plotCSV(data) {
+            const rows = data.split('\n').slice(1).map(row => row.split(',').map(Number));
+            const mass = rows.map(row => row[0]);
+            const intensity = rows.map(row => row[1]);
+
+            const trace = {
+                x: mass,
+                y: intensity,
+                mode: 'lines',
+                type: 'scatter'
+            };
+
+            const layout = {
+                title: 'Mass vs Intensity',
+                xaxis: { title: 'Mass' },
+                yaxis: { title: 'Intensity' }
+            };
+
+            Plotly.newPlot('plot', [trace], layout);
         }
     </script>
 </body>
