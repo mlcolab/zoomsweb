@@ -10,7 +10,7 @@ setup(
     install_requires=[
         'Flask>=2.0.0',
         'numpy<2.0.0',
-        'torch>=1.9.0',
+        'onnxruntime>=1.18',
     ],
     python_requires='>=3.7',
     author='Vladimir Starostin',

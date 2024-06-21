@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_from_directory
 
-from model import load_model, CNN1D
+from model import load_model
 
 app = Flask(__name__, static_folder='static')
 model = load_model()
