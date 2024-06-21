@@ -3,7 +3,9 @@
 
 ![zoomsweb](readme/img.png)
 
-To install the application, run the following commands in the terminal:
+The app is deployed at https://zoomsweb-b884f28c1db2.herokuapp.com/.
+
+To install the app locally, run the following commands in the terminal:
 ```bash
 git clone git@github.com:mlcolab/zoomsweb.git
 cd zoomsweb
@@ -15,4 +17,4 @@ To host the web app locally, run the following command in the terminal:
 zoomsweb
 ```
 
-and open the link http://127.0.0.1:5000/ in the browser.
+and open the link from the terminal in the browser.
