@@ -176,6 +176,12 @@ const colors = [
 
 function displayResults(results) {
     resultList.innerHTML = ''; // Clear the previous results
+    // clear peaksShown
+    for (let key in peaksShown) {
+        if (peaksShown.hasOwnProperty(key)) {
+            delete peaksShown[key];
+        }
+    }
     results.forEach((result, index) => {
         const item = document.createElement('button');
         item.textContent = `${result.name}: ${result.score.toFixed(4)}`;
