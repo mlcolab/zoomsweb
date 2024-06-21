@@ -45,7 +45,7 @@ class InferenceModel:
 
 class CNN1D(nn.Module):
     def __init__(self, input_size, num_classes):
-        super(CNN1D, self).__init__()
+        super().__init__()
 
         self.conv1 = nn.Conv1d(1, 32, kernel_size=5, stride=1)
         self.conv2 = nn.Conv1d(32, 64, kernel_size=5, stride=1)
@@ -70,5 +70,6 @@ class CNN1D(nn.Module):
 
 
 def load_model(name: str = 'model'):
-    model = torch.load(f'models/{name}.pth', map_location='cpu')
+    model = CNN1D(5201, 15)
+    model.load_state_dict(torch.load(f'models/{name}.pth', map_location='cpu'))
     return InferenceModel(model)
