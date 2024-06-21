@@ -18,12 +18,17 @@
         }
         .file-list-container {
             width: 30%;
-            margin-right: 20px;
             border: 1px solid #ccc;
             padding: 10px;
             border-radius: 5px;
             background-color: #f9f9f9;
             overflow-y: auto;
+        }
+        .resizer {
+            width: 5px;
+            cursor: ew-resize;
+            background-color: #ccc;
+            height: 100%;
         }
         .plot-container {
             flex-grow: 1;
@@ -73,10 +78,11 @@
 <body>
     <input type="file" id="fileInput" webkitdirectory directory multiple>
     <div class="file-viewer">
-        <div class="file-list-container">
+        <div class="file-list-container" id="fileListContainer">
             <div class="file-list" id="fileTree"></div>
         </div>
-        <div class="plot-container">
+        <div class="resizer" id="resizer"></div>
+        <div class="plot-container" id="plotContainer">
             <pre id="fileContent"></pre>
             <div id="plot"></div>
         </div>
@@ -87,6 +93,9 @@
         const fileTree = document.getElementById('fileTree');
         const fileContent = document.getElementById('fileContent');
         const plot = document.getElementById('plot');
+        const resizer = document.getElementById('resizer');
+        const fileListContainer = document.getElementById('fileListContainer');
+        const plotContainer = document.getElementById('plotContainer');
 
         let currentPath = [];
         let fileSystem = {};
@@ -190,6 +199,28 @@
             };
 
             Plotly.newPlot('plot', [trace], layout);
+        }
+
+        // Draggable resizer
+        resizer.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            document.addEventListener('mousemove', resize);
+            document.addEventListener('mouseup', stopResize);
+        });
+
+        function resize(e) {
+            const fileListWidth = e.clientX;
+            const plotWidth = window.innerWidth - fileListWidth - resizer.offsetWidth;
+
+            if (fileListWidth > 50 && plotWidth > 50) { // Ensure minimum widths for both containers
+                fileListContainer.style.width = fileListWidth + 'px';
+                plotContainer.style.width = plotWidth + 'px';
+            }
+        }
+
+        function stopResize() {
+            document.removeEventListener('mousemove', resize);
+            document.removeEventListener('mouseup', stopResize);
         }
     </script>
 </body>
