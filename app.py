@@ -25,9 +25,12 @@ def run_model():
         probabilities = F.softmax(output, dim=1).numpy()[0]
 
     results = sorted(
-        [{'name': classNames[i], 'score': float(probabilities[i])} for i in range(len(classNames))],
+        [{'name': classNames[i], 'score': 100 * round(float(probabilities[i]), 3)} for i in range(len(classNames))],
         key=lambda x: x['score'], reverse=True
     )
+    # only send results with score > 0.01
+    results = [r for r in results if r['score'] >= 1.]
+
     print(results)
     return jsonify(results)
 
