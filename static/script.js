@@ -140,7 +140,7 @@ function plotRawCSV(data) {
     };
 
     const layout = {
-        title: 'Mass vs Intensity (Raw Data)',
+        title: 'Mass spectrometry data',
         xaxis: { title: 'Mass' },
         yaxis: { title: 'Intensity' }
     };
