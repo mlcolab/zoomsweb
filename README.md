@@ -9,7 +9,7 @@ To install the app locally, run the following commands in the terminal:
 ```bash
 git clone git@github.com:mlcolab/zoomsweb.git
 cd zoomsweb
-python install . --user
+python install . -e
 ```
 
 To host the web app locally, run the following command in the terminal:
