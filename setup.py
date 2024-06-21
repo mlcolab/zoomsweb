@@ -11,6 +11,7 @@ setup(
         'Flask>=2.0.0',
         'numpy<2.0.0',
         'onnxruntime>=1.18',
+        'gunicorn',
     ],
     python_requires='>=3.7',
     author='Vladimir Starostin',
