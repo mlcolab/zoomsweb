@@ -34,12 +34,14 @@ def run_model():
             {
                 'name': name,
                 'score': 100 * round(float(probabilities[i]), 3),
-                'peaks': peaks[name]
+                'peaks': peaks[name],
             } for i, name in enumerate(classNames)],
         key=lambda x: x['score'], reverse=True
     )
     # only send results with score > 0.01
     results = [r for r in results if r['score'] >= 1.]
+    for i, result in enumerate(results):
+        result['id'] = i
 
     print(results)
     return jsonify(results)

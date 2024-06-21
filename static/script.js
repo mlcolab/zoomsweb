@@ -10,6 +10,7 @@ const resultList = document.getElementById('resultList');
 let currentPath = [];
 let fileSystem = {};
 let lastCSVData = null; // To store the last loaded CSV data
+let peaksShown = {}; // To keep track of which peaks are shown
 
 fileInput.addEventListener('change', (event) => {
     const files = Array.from(event.target.files);
@@ -168,14 +169,69 @@ async function runModel(data) {
     displayResults(results);
 }
 
+const colors = [
+    '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+    '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+];
+
 function displayResults(results) {
-    resultList.innerHTML = '<h3>Classification Results:</h3>';
-    results.forEach(result => {
-        const item = document.createElement('div');
+    resultList.innerHTML = ''; // Clear the previous results
+    results.forEach((result, index) => {
+        const item = document.createElement('button');
         item.textContent = `${result.name}: ${result.score.toFixed(4)}`;
+        item.classList.add('result-item', 'p-2', 'border', 'rounded', 'mb-2', 'bg-gray-200', 'hover:bg-gray-300', 'cursor-pointer');
+        item.dataset.index = index; // Store the index in a data attribute for easy access
+        item.addEventListener('click', () => togglePeaks(result, index, item));
         resultList.appendChild(item);
-        console.log(`${result.name}: ${result.peaks}`);
     });
+}
+
+function togglePeaks(result, index, button) {
+    const peakId = `peaks-${result.id}`;
+    const plotId = 'plot'; // assuming the id of your plot is 'plot'
+
+    if (peaksShown[peakId]) {
+        // Remove the peaks
+        const remainingShapes = Object.keys(peaksShown)
+            .filter(id => id !== peakId)
+            .reduce((acc, id) => acc.concat(peaksShown[id]), []);
+
+        const update = {
+            'shapes': remainingShapes
+        };
+
+        Plotly.relayout(plotId, update);
+
+        delete peaksShown[peakId];
+        button.style.backgroundColor = ''; // Reset button color
+    } else {
+        // Show the peaks
+        const color = colors[index % colors.length]; // Get the color from the colormap
+        const peakLines = result.peaks.map(peak => ({
+            type: 'line',
+            x0: peak,
+            x1: peak,
+            y0: 0,
+            y1: 1,
+            yref: 'paper', // use 'paper' to make sure it covers the full y-axis
+            line: {
+                color: color, // Set the color of the line
+                width: 1
+            }
+        }));
+
+        // Merge new peaks with existing ones
+        const existingShapes = Object.values(peaksShown).flat();
+        const newShapes = existingShapes.concat(peakLines);
+
+        const update = {
+            'shapes': newShapes
+        };
+
+        Plotly.relayout(plotId, update);
+        peaksShown[peakId] = peakLines;
+        button.style.backgroundColor = color; // Set button color
+    }
 }
 
 // Draggable resizer
